@@ -10,7 +10,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: emmamau/apiTemplate
+  IMAGE_NAME: Ricdrum14/API-Ricardo
 
 jobs:
   build-and-publish:
