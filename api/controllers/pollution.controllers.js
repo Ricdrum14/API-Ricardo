@@ -16,3 +16,19 @@ exports.get = (req, res) => {
     });
 
 }; 
+
+
+exports.get= (req, res) => {
+    const type = req.query.typePollution
+    const condition = type ? { typePollution: type } : null
+
+    Pollution.findAll({ where: condition })
+        .then(data => {
+            res.send(data)
+        })
+        .catch(err => {
+            res.status(500).send({
+                message: err.message || 'Some error occurred while retrieving pollutions.'
+            })
+        })
+}
