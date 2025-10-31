@@ -5,30 +5,30 @@ const db = require("../models");
 const Pollution = db.pollution;
 const Op = db.Sequelize.Op;
 
-exports.get = (req, res) => {
+// exports.get = (req, res) => {
 
-     Pollution.get()
-    .then(data => {res.send(data);})
-    .catch(err => {
-      res.status(400).send({
-        message: err.message
-      });
-    });
+//      Pollution.get()
+//     .then(data => {res.send(data);})
+//     .catch(err => {
+//       res.status(400).send({
+//         message: err.message
+//       });
+//     });
 
-}; 
+// }; 
 
 
-// exports.get= (req, res) => {
-//     const type = req.query.typePollution
-//     const condition = type ? { typePollution: type } : null
+exports.get= (req, res) => {
+    const type = req.query.typePollution
+    const condition = type ? { typePollution: type } : undefined;
 
-//     Pollution.findAll({ where: condition })
-//         .then(data => {
-//             res.send(data)
-//         })
-//         .catch(err => {
-//             res.status(500).send({
-//                 message: err.message || 'Some error occurred while retrieving pollutions.'
-//             })
-//         })
-// }
+    Pollution.findAll({ where: condition })
+        .then(data => {
+            res.send(data)
+        })
+        .catch(err => {
+            res.status(500).send({
+                message: err.message || "Une erreur est survenue lors de la récupération des pollutions."
+            })
+        })
+}
