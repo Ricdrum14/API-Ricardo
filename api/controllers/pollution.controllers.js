@@ -1,8 +1,6 @@
 // const { v4: uuidv4 } = require ("uuid");
 
-import { Request, Response } from "express";
 const db = require("../models");
-
 const Pollution = db.pollution;
 
 
