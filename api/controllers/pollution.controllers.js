@@ -1,34 +1,48 @@
 // const { v4: uuidv4 } = require ("uuid");
 
-
+import { Request, Response } from "express";
 const db = require("../models");
+
 const Pollution = db.pollution;
-const Op = db.Sequelize.Op;
-
-// exports.get = (req, res) => {
-
-//      Pollution.get()
-//     .then(data => {res.send(data);})
-//     .catch(err => {
-//       res.status(400).send({
-//         message: err.message
-//       });
-//     });
-
-// }; 
 
 
-exports.get= (req, res) => {
-    const type = req.query.typePollution
-    const condition = type ? { typePollution: type } : undefined;
+exports.getAll = async (req, res) => {
+    try{
+        const type = req.query.typePollution
+        const condition = type ? { typePollution: type } : undefined;
 
-    Pollution.findAll({ where: condition })
-        .then(data => {
-            res.send(data)
-        })
-        .catch(err => {
-            res.status(500).send({
-                message: err.message || "Une erreur est survenue lors de la récupération des pollutions."
-            })
-        })
+        const data = await Pollution.findAll({ where: condition });
+
+        res.status(200).json(data);
+     
+    }catch(err){
+            console.error("Erreur lors de la récupération des pollutions :", err);
+        res.status(500).json({
+        message:
+        err.message ||
+        "Une erreur est survenue lors de la récupération des pollutions.",
+        });
+    }
+};
+
+
+exports.getOne = async (req, res) => {
+    try{
+        const id = req.params.id;
+        const data = await Pollution.findByPk(id);
+
+        if (data) {
+            res.status(200).json(data);
+        } else {
+            res.status(404).json({ message: `Pollution with id=${id} not found.` });
+        }
+    }catch(err){
+            console.error("Erreur lors de la récupération de la pollution :", err);
+        res.status(500).json({
+        message:
+        err.message ||
+        "Une erreur est survenue lors de la récupération de la pollution.",
+        });
+    }   
 }
+
