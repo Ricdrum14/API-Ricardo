@@ -88,6 +88,44 @@ export const create = async (req: Request<{}, {}, CreatePollutionBody>, res: Res
     }
 };
 
+// Update a pollution record by ID
+export const update = async (req: Request<{ id: string }, {}, Partial<CreatePollutionBody>>, res: Response) => {
+    try {
+        const id = req.params.id;
+
+        // Validate if there's data to update
+        if (Object.keys(req.body).length === 0) {
+            res.status(400).json({
+                message: "Les données pour la mise à jour ne peuvent pas être vides!"
+            });
+            return;
+        }
+
+        const num = await Pollution.update(req.body, {
+            where: { id }
+        });
+
+        if (num[0] === 1) {
+            const updatedPollution = await Pollution.findByPk(id);
+            res.status(200).json({
+                message: "La pollution a été mise à jour avec succès.",
+                data: updatedPollution
+            });
+        } else {
+            res.status(404).json({
+                message: `Impossible de mettre à jour la pollution avec id=${id}. La pollution n'a peut-être pas été trouvée.`
+            });
+        }
+    } catch (err) {
+        console.error("Erreur lors de la mise à jour de la pollution :", err);
+        res.status(500).json({
+            message: err instanceof Error 
+                ? err.message 
+                : "Une erreur est survenue lors de la mise à jour de la pollution."
+        });
+    }
+};
+
 // Delete a pollution record by ID
 export const remove = async (req: Request<{ id: string }>, res: Response) => {
     try {
