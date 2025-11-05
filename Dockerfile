@@ -2,11 +2,21 @@ FROM node:22
 
 WORKDIR /app
 
+# Copy package files
 COPY api/package*.json ./
-RUN npm install --production
 
+# Install all dependencies (including devDependencies)
+RUN npm install
+
+# Copy source code
 COPY api/ ./
 
-EXPOSE 3000
+# Build TypeScript
+RUN npm run build
+
+# Remove devDependencies
+RUN npm prune --production
+
+EXPOSE 443
 
 CMD ["npm", "start"]

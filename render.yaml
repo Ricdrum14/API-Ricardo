@@ -1,8 +1,11 @@
 services:
   - type: web
-    name: angular-node-monorepo
+    name: api-ricardo
     env: docker
     dockerContext: .
     plan: free
     region: frankfurt
     dockerfilePath: ./Dockerfile
+    envVars:
+      - key: PORT
+        value: 443
