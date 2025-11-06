@@ -18,7 +18,7 @@ const corsOptions: cors.CorsOptions = {
 app.use(cors(corsOptions));
 
 // Built-in express middleware to parse JSON payloads
-app.use(express.json());
+app.use(express.json({limit: '10mb'}));
 
 // Built-in express middleware to parse URL-encoded payloads
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
