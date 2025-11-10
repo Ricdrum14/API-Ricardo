@@ -10,5 +10,5 @@
     router.delete("/:id", pollution.remove); // Delete a pollution entry by id
 
     export default (app: express.Application): void => {
-        app.use('/api/pollution', router); // Prefix all routes with /api/pollution
+        app.use('/api/pollutions', router); // Prefix all routes with /api/pollution
     };
