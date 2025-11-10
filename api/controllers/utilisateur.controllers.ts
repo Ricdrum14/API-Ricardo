@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import db from '../models';
 import { UtilisateurAttributes } from '../models/utilisateur.model';
+import bcrypt from 'bcrypt'; 
 
 const Utilisateur = db.utilisateur;
 
@@ -35,7 +36,8 @@ export const getOne = async (req: Request<{ id: string }>, res: Response) => {
   }
 };
 
-/** 🔹 Créer un nouvel utilisateur */
+
+
 export const create = async (req: Request<{}, {}, UtilisateurAttributes>, res: Response) => {
   try {
     const { nom, prenom, email, mot_de_passe, role } = req.body;
@@ -49,7 +51,17 @@ export const create = async (req: Request<{}, {}, UtilisateurAttributes>, res: R
       return res.status(409).json({ message: 'Cet email est déjà utilisé.' });
     }
 
-    const user = await Utilisateur.create({ nom, prenom, email, mot_de_passe, role });
+    // ✅ Hash du mot de passe avant création
+    const hashedPassword = await bcrypt.hash(mot_de_passe, 10);
+
+    const user = await Utilisateur.create({
+      nom,
+      prenom,
+      email,
+      mot_de_passe: hashedPassword,
+      role
+    });
+
     const { mot_de_passe: _, ...userSansMDP } = user.toJSON();
     res.status(201).json(userSansMDP);
   } catch (error) {
@@ -57,6 +69,7 @@ export const create = async (req: Request<{}, {}, UtilisateurAttributes>, res: R
     res.status(500).json({ message: 'Erreur serveur' });
   }
 };
+
 
 /** 🔹 Mettre à jour un utilisateur */
 export const update = async (req: Request<{ id: string }, {}, Partial<UtilisateurAttributes>>, res: Response) => {
