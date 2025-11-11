@@ -13,27 +13,21 @@ export const register = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'Tous les champs sont requis.' });
     }
 
-    // Vérifie si l’email existe déjà
     const exist = await Utilisateur.findOne({ where: { email } });
     if (exist) {
       return res.status(409).json({ message: 'Cet email est déjà utilisé.' });
     }
 
-    // Hash du mot de passe
-    const hashedPassword = await bcrypt.hash(mot_de_passe, 10);
-
-    // Création de l’utilisateur
+  
     const newUser = await Utilisateur.create({
       nom,
       prenom,
       email,
-      mot_de_passe: hashedPassword,
+      mot_de_passe, // le hook beforeCreate va le hasher automatiquement
       role: 'utilisateur'
     });
 
-    // Supprime le mot de passe avant de renvoyer
     const { mot_de_passe: _, ...userSansMDP } = newUser.toJSON();
-
     return res.status(201).json(userSansMDP);
   } catch (error) {
     console.error('Erreur register:', error);

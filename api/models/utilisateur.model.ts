@@ -72,8 +72,12 @@ export default function (sequelize: Sequelize): ModelStatic<UtilisateurInstance>
 
   //Hooks de hashage du mot de passe
   Utilisateur.beforeCreate(async (user) => {
+  // Empêche de re-hasher un mot de passe déjà hashé
+  if (!user.mot_de_passe.startsWith('$2b$')) {
     user.mot_de_passe = await bcrypt.hash(user.mot_de_passe, 10);
-  });
+  }
+});
+
 
   Utilisateur.beforeUpdate(async (user) => {
     if (user.changed('mot_de_passe')) {
