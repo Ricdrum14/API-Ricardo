@@ -4,6 +4,16 @@ import { PollutionAttributes } from '../models/pollution.model';
 
 const Pollution = db.pollution;
 
+// Regex patterns pour éviter les injections
+const patterns = {
+  id: /^\d+$/,
+  titre: /^[a-zA-Z0-9\s\-,'àâäéèêëïîôöùûüçÀÂÄÉÈÊËÏÎÔÖÙÛÜÇ.()]{2,200}$/,
+  typePollution: /^[a-zA-Z\s\-]{2,50}$/,
+  latitude: /^-?([0-8]?[0-9]|90)(\.[0-9]{1,6})?$/,
+  longitude: /^-?(180|1[0-7][0-9]|[0-9]{1,2})(\.[0-9]{1,6})?$/,
+  url: /^(https?:\/\/)?.+\..+$/,
+};
+
 interface PollutionQuery {
     typePollution?: string;
 }
@@ -35,6 +45,13 @@ export const getAll = async (req: Request<{}, {}, {}, PollutionQuery>, res: Resp
 export const getOne = async (req: Request<{ id: string }>, res: Response) => {
     try {
         const id = req.params.id;
+
+        // Validation de l'ID
+        if (!patterns.id.test(id)) {
+            res.status(400).json({ message: 'ID invalide' });
+            return;
+        }
+
         const data = await Pollution.findByPk(id);
 
         if (data) {
@@ -59,6 +76,37 @@ export const create = async (req: Request<{}, {}, CreatePollutionBody>, res: Res
         if (!req.body.titre) {
             res.status(400).json({
                 message: "Le titre ne peut pas être vide!"
+            });
+            return;
+        }
+
+        // Validation regex du titre
+        if (!patterns.titre.test(req.body.titre)) {
+            res.status(400).json({
+                message: "Le titre contient des caractères invalides!"
+            });
+            return;
+        }
+
+        // Validation optionnelle des coordonnées
+        if (req.body.latitude && !patterns.latitude.test(req.body.latitude.toString())) {
+            res.status(400).json({
+                message: "Latitude invalide!"
+            });
+            return;
+        }
+
+        if (req.body.longitude && !patterns.longitude.test(req.body.longitude.toString())) {
+            res.status(400).json({
+                message: "Longitude invalide!"
+            });
+            return;
+        }
+
+        // Validation optionnelle de l'URL de photo
+        if (req.body.photo_url && !patterns.url.test(req.body.photo_url)) {
+            res.status(400).json({
+                message: "URL de photo invalide!"
             });
             return;
         }
@@ -93,10 +141,47 @@ export const update = async (req: Request<{ id: string }, {}, Partial<CreatePoll
     try {
         const id = req.params.id;
 
+        // Validation de l'ID
+        if (!patterns.id.test(id)) {
+            res.status(400).json({ message: 'ID invalide' });
+            return;
+        }
+
         // Validate if there's data to update
         if (Object.keys(req.body).length === 0) {
             res.status(400).json({
                 message: "Les données pour la mise à jour ne peuvent pas être vides!"
+            });
+            return;
+        }
+
+        // Validation du titre s'il est présent
+        if (req.body.titre && !patterns.titre.test(req.body.titre)) {
+            res.status(400).json({
+                message: "Le titre contient des caractères invalides!"
+            });
+            return;
+        }
+
+        // Validation des coordonnées si présentes
+        if (req.body.latitude && !patterns.latitude.test(req.body.latitude.toString())) {
+            res.status(400).json({
+                message: "Latitude invalide!"
+            });
+            return;
+        }
+
+        if (req.body.longitude && !patterns.longitude.test(req.body.longitude.toString())) {
+            res.status(400).json({
+                message: "Longitude invalide!"
+            });
+            return;
+        }
+
+        // Validation de l'URL si présente
+        if (req.body.photo_url && !patterns.url.test(req.body.photo_url)) {
+            res.status(400).json({
+                message: "URL de photo invalide!"
             });
             return;
         }
@@ -130,6 +215,13 @@ export const update = async (req: Request<{ id: string }, {}, Partial<CreatePoll
 export const remove = async (req: Request<{ id: string }>, res: Response) => {
     try {
         const id = req.params.id;
+
+        // Validation de l'ID
+        if (!patterns.id.test(id)) {
+            res.status(400).json({ message: 'ID invalide' });
+            return;
+        }
+
         const num = await Pollution.destroy({
             where: { id }
         });

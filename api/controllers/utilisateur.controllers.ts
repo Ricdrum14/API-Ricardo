@@ -5,6 +5,15 @@ import bcrypt from 'bcrypt';
 
 const Utilisateur = db.utilisateur;
 
+// Regex patterns pour éviter les injections
+const patterns = {
+  email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+  nom: /^[a-zA-ZÀ-ÿ\s'-]{2,50}$/,
+  prenom: /^[a-zA-ZÀ-ÿ\s'-]{2,50}$/,
+  password: /^.{8,}$/, // Minimum 8 caractères
+  id: /^\d+$/, // Numérique
+};
+
 /** 🔹 Récupérer tous les utilisateurs */
 export const getAll = async (_req: Request, res: Response) => {
   try {
@@ -21,7 +30,14 @@ export const getAll = async (_req: Request, res: Response) => {
 /** 🔹 Récupérer un utilisateur par ID */
 export const getOne = async (req: Request<{ id: string }>, res: Response) => {
   try {
-    const user = await Utilisateur.findByPk(req.params.id, {
+    const { id } = req.params;
+
+    // Validation de l'ID
+    if (!patterns.id.test(id)) {
+      return res.status(400).json({ message: 'ID invalide' });
+    }
+
+    const user = await Utilisateur.findByPk(id, {
       attributes: { exclude: ['mot_de_passe'] }
     });
 
@@ -44,6 +60,20 @@ export const create = async (req: Request<{}, {}, UtilisateurAttributes>, res: R
 
     if (!email || !mot_de_passe || !nom || !prenom) {
       return res.status(400).json({ message: 'Champs requis manquants.' });
+    }
+
+    // Validation avec regex
+    if (!patterns.email.test(email)) {
+      return res.status(400).json({ message: 'Email invalide.' });
+    }
+    if (!patterns.nom.test(nom)) {
+      return res.status(400).json({ message: 'Nom invalide (2-50 caractères).' });
+    }
+    if (!patterns.prenom.test(prenom)) {
+      return res.status(400).json({ message: 'Prénom invalide (2-50 caractères).' });
+    }
+    if (!patterns.password.test(mot_de_passe)) {
+      return res.status(400).json({ message: 'Mot de passe doit contenir au minimum 8 caractères.' });
     }
 
     const exist = await Utilisateur.findOne({ where: { email } });
@@ -80,12 +110,26 @@ export const update = async (
     const id = req.params.id;
     const { email, mot_de_passe } = req.body;
 
+    // Validation de l'ID
+    if (!patterns.id.test(id)) {
+      return res.status(400).json({ message: 'ID invalide' });
+    }
+
     // ✅ Prépare les données à mettre à jour
     const dataToUpdate: any = {};
-    if (email) dataToUpdate.email = email;
+    if (email) {
+      // Validation email
+      if (!patterns.email.test(email)) {
+        return res.status(400).json({ message: 'Email invalide.' });
+      }
+      dataToUpdate.email = email;
+    }
 
-    // ✅ Si un mot de passe est fourni, on le hache avant mise à jour
+    // ✅ Si un mot de passe est fourni, on le valide et hache avant mise à jour
     if (mot_de_passe) {
+      if (!patterns.password.test(mot_de_passe)) {
+        return res.status(400).json({ message: 'Mot de passe doit contenir au minimum 8 caractères.' });
+      }
       const hashedPassword = await bcrypt.hash(mot_de_passe, 10);
       dataToUpdate.mot_de_passe = hashedPassword;
     }
@@ -108,7 +152,14 @@ export const update = async (
 /** 🔹 Supprimer un utilisateur */
 export const remove = async (req: Request<{ id: string }>, res: Response) => {
   try {
-    const nbDeleted = await Utilisateur.destroy({ where: { id: req.params.id } });
+    const { id } = req.params;
+
+    // Validation de l'ID
+    if (!patterns.id.test(id)) {
+      return res.status(400).json({ message: 'ID invalide' });
+    }
+
+    const nbDeleted = await Utilisateur.destroy({ where: { id } });
 
     if (nbDeleted === 0) {
       return res.status(404).json({ message: 'Utilisateur introuvable.' });
