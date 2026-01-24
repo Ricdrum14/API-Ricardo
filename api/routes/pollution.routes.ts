@@ -5,8 +5,9 @@ import jwtMiddleware from '../middlewares/jwtMiddleware';
 const router: Router = express.Router();
 
 // Routes protégées par JWT
-router.get("/", jwtMiddleware, pollution.getAll); // Retrieve all pollution entries
-router.get("/:id", jwtMiddleware, pollution.getOne); // Retrieve a single pollution entry by id
+router.get("/", pollution.getAll); // Retrieve all pollution entries
+router.get("/me", jwtMiddleware, pollution.getMine); // Retrieve pollution entries for the authenticated user
+router.get("/:id", pollution.getOne); // Retrieve a single pollution entry by id
 router.post("/", jwtMiddleware, pollution.create); // Create a new pollution entry
 router.put("/:id", jwtMiddleware, pollution.update); // Update a pollution entry by id
 router.delete("/:id", jwtMiddleware, pollution.remove); // Delete a pollution entry by id

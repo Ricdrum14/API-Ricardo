@@ -1,6 +1,6 @@
 import express from 'express';
 import { register, login } from '../controllers/auth.controllers';
-import jwtMiddleware from '../middlewares/jwtMiddleware';
+
 
 const router = express.Router();
 
